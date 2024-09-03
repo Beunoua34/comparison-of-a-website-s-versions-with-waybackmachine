@@ -8,7 +8,10 @@ def get_snapshots(url, limit):  #the limit is the number of snapshots we want to
     cdx_url = f"http://web.archive.org/cdx/search/cdx?url={url}&output=json&fl=timestamp,original&collapse=timestamp:6"
     response = requests.get(cdx_url)
     snapshots = response.json()[1:]  # ignore the header
-    return snapshots[len(snapshots)-limit:]
+    if len(snapshots)>limit:
+        return snapshots[len(snapshots)-limit:]
+    else: 
+        return snapshots 
 
 def get_snapshot_content(snapshot_url): #here we compare only the text, but maybe comparing the CSS is more interesting
     response = requests.get(snapshot_url)
@@ -16,14 +19,12 @@ def get_snapshot_content(snapshot_url): #here we compare only the text, but mayb
     return soup.get_text() 
 
 def compare_snapshots(url):
-    number_tests=10   #here we test only the last 10 snapshots of the website
+    number_tests=9   #here we test only the last 10 snapshots of the website
     snapshots = get_snapshots(url,number_tests)
     if number_tests>len(snapshots):
         number_tests=len(snapshots)
     i=len(snapshots)-1 
-
     while (i>=len(snapshots)-number_tests)+1:  #we start from the most recent snapshot and we increment to the past
-
         timestamp1, original_url = snapshots[i]
         timestamp2, _ = snapshots[i-1]
         
@@ -45,5 +46,5 @@ def compare_snapshots(url):
 
 
 # test on a URL
-url = "https://www.igloorental.se/"  #a random website of the database
+url = "example.com"  #a random website of the database
 compare_snapshots(url)
